@@ -1,0 +1,109 @@
+{
+  "name": "librarii",
+  "version": "0.1.0",
+  "skills": [
+    {
+      "name": "define-idea",
+      "description": "Guide la définition d'une idée ou opportunité étape par étape — du déclencheur brut à la fiche de synthèse structurée",
+      "version": "0.1.0",
+      "author": "librarii",
+      "tags": ["stratégie", "idéation", "cadrage"],
+      "path": "skills/define-idea/SKILL.md",
+      "history": [
+        { "version": "0.1.0", "tag": "v0.1.0" }
+      ]
+    },
+    {
+      "name": "brief",
+      "description": "Transforme un cadrage ou une idée validée en brief projet structuré, prêt à être partagé aux parties prenantes",
+      "version": "0.1.0",
+      "author": "librarii",
+      "tags": ["stratégie", "brief", "rédaction"],
+      "path": "skills/brief/SKILL.md",
+      "history": [
+        { "version": "0.1.0", "tag": "v0.1.0" }
+      ]
+    },
+    {
+      "name": "user-research",
+      "description": "Identifie et caractérise les utilisateurs cibles — construit des personas et cartographie leurs parcours",
+      "version": "0.1.0",
+      "author": "librarii",
+      "tags": ["stratégie", "utilisateurs", "ux", "personas"],
+      "path": "skills/user-research/SKILL.md",
+      "history": [
+        { "version": "0.1.0", "tag": "v0.1.0" }
+      ]
+    },
+    {
+      "name": "market-analysis",
+      "description": "Analyse le marché et la concurrence — identifie les acteurs, compare les offres, repère les opportunités de différenciation",
+      "version": "0.1.0",
+      "author": "librarii",
+      "tags": ["stratégie", "marché", "concurrence", "benchmark"],
+      "path": "skills/market-analysis/SKILL.md",
+      "history": [
+        { "version": "0.1.0", "tag": "v0.1.0" }
+      ]
+    },
+    {
+      "name": "solution-design",
+      "description": "Explore et évalue les solutions possibles — compare les options, analyse les tradeoffs, recommande une approche",
+      "version": "0.1.0",
+      "author": "librarii",
+      "tags": ["stratégie", "solution", "évaluation", "design"],
+      "path": "skills/solution-design/SKILL.md",
+      "history": [
+        { "version": "0.1.0", "tag": "v0.1.0" }
+      ]
+    },
+    {
+      "name": "business-model",
+      "description": "Définit le modèle économique — proposition de valeur, segments, revenus, coûts, canaux",
+      "version": "0.1.0",
+      "author": "librarii",
+      "tags": ["stratégie", "business-model", "pricing", "économie"],
+      "path": "skills/business-model/SKILL.md",
+      "history": [
+        { "version": "0.1.0", "tag": "v0.1.0" }
+      ]
+    },
+    {
+      "name": "skill-creator",
+      "description": "Guides the creation of a well-formed librarii skill from scratch — captures intent, writes structured SKILL.md, and saves it to the workspace. Use when the user wants to create, write, build, or define a new skill.",
+      "version": "0.1.0",
+      "author": "librarii",
+      "tags": ["skill", "creation", "meta"],
+      "path": "skills/skill-creator/SKILL.md",
+      "history": [
+        { "version": "0.1.0", "tag": "v0.1.0" }
+      ]
+    },
+    {
+      "name": "process-builder",
+      "description": "Cartographie un processus métier sous forme de fichier .process.json (steps + swimlanes + connections + métadonnées + livrables) dans processes/. Intervieweur qui questionne acteurs, étapes, enchaînements, décisions et livrables jusqu'à une description exhaustive.",
+      "version": "0.2.0",
+      "author": "librarii",
+      "tags": ["process", "business", "cartography", "interview"],
+      "path": "skills/process-builder/SKILL.md",
+      "history": [
+        { "version": "0.1.0", "tag": "v0.1.0" },
+        { "version": "0.2.0", "tag": "v0.2.0" }
+      ]
+    }
+  ],
+  "agents": [
+    {
+      "name": "cadrage",
+      "description": "Orchestre le cadrage complet d'un projet — de l'idée brute au modèle économique, en passant par les utilisateurs, le marché et les solutions",
+      "version": "0.1.0",
+      "author": "librarii",
+      "tags": ["stratégie", "cadrage", "orchestration"],
+      "path": "agents/cadrage/AGENT.md",
+      "skills": ["define-idea", "user-research", "market-analysis", "solution-design", "business-model"],
+      "history": [
+        { "version": "0.1.0", "tag": "v0.1.0" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+name: Discord — Release Notifications
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    if: github.repository == 'binarii-io/librarii'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Release Published
+        uses: tsickert/discord-webhook@v7.0.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          embed-title: "Release ${{ github.event.release.tag_name }}"
+          embed-url: ${{ github.event.release.html_url }}
+          embed-description: |
+            **${{ github.repository }}**
+
+            ${{ github.event.release.body }}
+          embed-color: 15844367
