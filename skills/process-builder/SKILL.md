@@ -1,7 +1,7 @@
 ---
 name: process-builder
 description: "Cartographie un processus métier sous forme de fichier .process.json (steps + swimlanes + connections + métadonnées + livrables) dans le dossier processes/ du workspace. Agit comme intervieweur : laisse l'utilisateur décrire le processus en langage naturel puis pose des questions ciblées pour identifier acteurs, étapes, enchaînements, décisions, livrables et points manquants jusqu'à obtenir une description exhaustive. Déclencher dès que l'utilisateur veut 'définir un processus', 'cartographier un workflow', 'modéliser un flux métier', 'décrire qui fait quoi', structurer un process existant ou créer un nouveau .process.json — même sans mention explicite du mot 'processus'."
-version: 0.2.0
+version: 0.3.0
 author: librarii
 tags: [process, business, cartography, interview]
 argument-hint: "[nom du processus ou description libre]"
@@ -43,14 +43,14 @@ Laisse l'utilisateur décrire librement le processus d'abord. **Ne l'interromps 
 Points à couvrir — adapte-toi à la description :
 
 - **Acteurs** (→ swimlanes) : qui fait quoi ? Humain (`user`), système/outil (`system`), autre (utilise un type custom comme `"Partner"`, `"API"`, `"Support"`). Un acteur par swimlane.
-- **Étapes** : verbe d'action + objet (ex : « J'ai rédigé l'epic JIRA »). Chaque étape vit dans une swimlane.
+- **Étapes** : toujours formulées **au passé à la première personne** (je / nous / on) — verbe d'action + objet. Exemples : « J'ai rédigé l'epic JIRA », « Nous avons validé le devis », « On a déployé en prod ». Jamais d'infinitif (« Rédiger l'epic ») ni d'impératif (« Rédige l'epic »). Chaque étape vit dans une swimlane.
 - **Déclencheur initial** : quelle étape démarre le processus ?
 - **Enchaînements** : chaque étape mène à quoi ?
 - **Embranchements** : décisions (oui/non, cas A/cas B) ? Une étape peut avoir plusieurs successeurs.
 - **Points de fin** : où le processus se termine-t-il ? Plusieurs terminaisons possibles ?
 - **Boucles** : retours en arrière (rework, validation rejetée…) ?
 - **Livrables clés** : à quelles étapes des artefacts sont produits ou consommés (brief, contrat, dataset, dashboard…) ?
-- **Transitions inter-acteurs** : quand et comment l'action passe d'un acteur à l'autre ?
+- **Transitions inter-acteurs** : quand l'action passe d'un acteur à l'autre, formalise toujours une **paire output / input** (verticale) : un step « output » dans la lane source (« J'ai envoyé la demande à la compta »), un step « input » dans la lane cible (« J'ai reçu la demande à valider », « Le système a enregistré la demande »). Les deux steps partagent le même `x` — la connexion est strictement verticale. Jamais de diagonale entre lanes.
 
 **Techniques d'interview :**
 
@@ -162,6 +162,7 @@ Les livrables sont stockés comme un tableau de **titres** (strings, pas d'IDs) 
 
 #### Steps
 
+- **`name` (libellé)** : toujours au **passé à la première personne** (je / nous / on). Exemples : « J'ai rédigé le brief », « Nous avons validé le devis », « On a déployé en prod », « Le système a enregistré la demande » (pour une lane `system`). Si l'utilisateur formule à l'infinitif ou à l'impératif, reformule systématiquement au passé personnel avant d'écrire.
 - **`width`** : toujours `200` à la création. L'utilisateur pourra resize après.
 - **`height`** : **ne pas mettre** (laisser auto). La hauteur s'adapte au contenu (texte + skills + deliverables). Ne mets `height` que si l'utilisateur a une exigence explicite.
 - **`skills`** : tableau de **noms** (string), pas d'IDs.
@@ -183,9 +184,18 @@ Les livrables sont stockés comme un tableau de **titres** (strings, pas d'IDs) 
 #### Layout (positions x/y)
 
 - **Largeur d'un step** : 200px (cf. `width`).
-- **Espacement horizontal** entre colonnes : 200px. Premier `x = 174`.
+- **Espacement horizontal** entre colonnes : **exactement 200px**. Premier `x = 174`. Donc `x ∈ {174, 374, 574, 774, 974, …}`. Chaque step occupe sa propre colonne, **deux steps ne partagent jamais la même colonne dans la même lane**.
 - **Calcul de `x`** : tri topologique du graphe de connexions. Niveau = longueur du plus long chemin depuis une racine. `x = 174 + niveau × 200`.
-- **Calcul de `y`** : un step est positionné dans sa swimlane. `y = somme des heights des swimlanes précédentes + 51.5` (centré dans la swimlane). Si plusieurs steps d'une même swimlane partagent le même `x`, décale-les de ±60px en vertical.
+- **Alignement vertical dans la lane** : tous les steps d'une même swimlane partagent **exactement le même `y`**. `y = somme des heights des swimlanes précédentes + 51.5` (centré dans la swimlane). **Ne jamais décaler verticalement** des steps d'une même lane — c'est la règle de confort de lecture. Si deux steps d'une même lane tombent au même `x`, c'est que les niveaux topologiques sont mal calculés, revois le graphe.
+
+#### Transitions inter-swimlanes (strictement verticales)
+
+Toute connexion qui change de swimlane doit être **verticale** — source et cible au même `x`. Pour chaque changement d'acteur, génère une **paire output → input** :
+
+- **Step output** dans la lane source, formulé comme un envoi / une émission : « J'ai envoyé la demande à la compta », « Nous avons transmis le dossier », « On a poussé l'event ».
+- **Step input** dans la lane cible, formulé comme une réception / un enregistrement : « J'ai reçu la demande à valider », « Le système a enregistré la demande ».
+- Les deux steps ont **exactement le même `x`** (même colonne) et des `y` différents (chacun dans sa lane). La connexion `output → input` est donc purement verticale.
+- Jamais de connexion directe diagonale entre deux lanes sans cette paire. Si tu en génères une, corrige en insérant le couple output/input au même `x` avant écriture.
 
 #### Connections
 
@@ -233,6 +243,10 @@ Crée le dossier s'il n'existe pas. Si le fichier existe déjà, demander avant 
 ## Gotchas
 
 - **Ne jamais écrire dans `.librarii/`** : les fichiers de processus vivent dans `processes/` à la racine du workspace. `.librarii/` est réservé à l'état interne de l'extension (skills installés, overrides, manifests).
+- **Libellés au passé personnel** : chaque `step.name` est au passé à la première personne (je / nous / on). Si l'utilisateur dit « envoyer le devis », reformule en « J'ai envoyé le devis ». Jamais d'infinitif ni d'impératif.
+- **Alignement horizontal dans la lane** : tous les steps d'une même swimlane ont **le même `y`**. Pas d'offset vertical, jamais.
+- **Espacement 200px strict** : deux steps consécutifs sont toujours écartés de 200px en `x`. Ne jamais générer de colonnes intermédiaires ou d'espacements variables.
+- **Changement de lane = transition verticale** : toute connexion qui traverse une swimlane passe par une paire **output → input au même `x`**. Jamais de diagonale entre lanes. Si l'utilisateur décrit « le commercial envoie à la compta », matérialise-le en deux steps (un dans chaque lane, même `x`) reliés verticalement.
 - **Une étape = une swimlane** : chaque step doit avoir un `swimlaneId`. Si l'utilisateur décrit une étape partagée, demande qui est **responsable principal**.
 - **Pas de step orphelin** : chaque step doit avoir au moins une connexion entrante OU être identifié comme point de départ. Signale les orphelins avant écriture.
 - **Connexions cohérentes** : ne référence que des `step-id` qui existent dans `steps[]`. Si tu as généré des `children`, leurs connexions internes référencent les IDs **internes** (du sous-process), pas ceux du root.
@@ -246,6 +260,12 @@ Crée le dossier s'il n'existe pas. Si le fichier existe déjà, demander avant 
 ## Exemple complet
 
 Entrée utilisateur : « Le commercial envoie une demande de devis, la compta valide, on envoie au client. C'est piloté par Andrea, tags sales et validation. »
+
+Noter :
+- Libellés reformulés au **passé à la première personne**.
+- Chaque changement de lane passe par une **paire output / input au même `x`** (transitions verticales).
+- Tous les steps d'une même lane partagent le **même `y`** (alignement horizontal).
+- Colonnes espacées de 200px : `x ∈ {174, 374, 574, 774, 974}`.
 
 Sortie :
 
@@ -261,7 +281,7 @@ Sortie :
   "steps": [
     {
       "id": "step-1",
-      "name": "Envoyer demande de devis",
+      "name": "J'ai reçu la demande de devis",
       "x": 174,
       "y": 51.5,
       "width": 200,
@@ -271,7 +291,16 @@ Sortie :
     },
     {
       "id": "step-2",
-      "name": "Valider le devis",
+      "name": "J'ai transmis la demande à la compta",
+      "x": 374,
+      "y": 51.5,
+      "width": 200,
+      "skills": [],
+      "swimlaneId": "lane-1"
+    },
+    {
+      "id": "step-3",
+      "name": "J'ai reçu la demande à valider",
       "x": 374,
       "y": 201.5,
       "width": 200,
@@ -279,9 +308,36 @@ Sortie :
       "swimlaneId": "lane-2"
     },
     {
-      "id": "step-3",
-      "name": "Envoyer au client",
+      "id": "step-4",
+      "name": "J'ai validé le devis",
       "x": 574,
+      "y": 201.5,
+      "width": 200,
+      "skills": [],
+      "swimlaneId": "lane-2"
+    },
+    {
+      "id": "step-5",
+      "name": "J'ai renvoyé le devis validé au commercial",
+      "x": 774,
+      "y": 201.5,
+      "width": 200,
+      "skills": [],
+      "swimlaneId": "lane-2"
+    },
+    {
+      "id": "step-6",
+      "name": "J'ai reçu le devis validé",
+      "x": 774,
+      "y": 51.5,
+      "width": 200,
+      "skills": [],
+      "swimlaneId": "lane-1"
+    },
+    {
+      "id": "step-7",
+      "name": "J'ai envoyé le devis au client",
+      "x": 974,
       "y": 51.5,
       "width": 200,
       "skills": [],
@@ -291,7 +347,11 @@ Sortie :
   ],
   "connections": [
     { "from": "step-1", "to": "step-2" },
-    { "from": "step-2", "to": "step-3" }
+    { "from": "step-2", "to": "step-3" },
+    { "from": "step-3", "to": "step-4" },
+    { "from": "step-4", "to": "step-5" },
+    { "from": "step-5", "to": "step-6" },
+    { "from": "step-6", "to": "step-7" }
   ],
   "swimlanes": [
     { "id": "lane-1", "name": "Commercial", "type": "user", "color": "blue", "order": 0, "height": 150 },
@@ -299,6 +359,10 @@ Sortie :
   ]
 }
 ```
+
+Transitions verticales dans cet exemple :
+- `step-2 → step-3` (Commercial → Compta, `x=374`)
+- `step-5 → step-6` (Compta → Commercial, `x=774`)
 
 À écrire à : `processes/devis-validation/devis-validation.process.json`
 
